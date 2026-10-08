@@ -1,0 +1,61 @@
+import java.util.ArrayList;
+import java.util.List;
+
+/** Organigrama empresarial modelado como árbol general. */
+public class Organigrama {
+
+    static class Nodo {
+        String valor;
+        List<Nodo> hijos = new ArrayList<>();
+
+        Nodo(String valor) { this.valor = valor; }
+
+        Nodo agregar(String valorHijo) {
+            Nodo hijo = new Nodo(valorHijo);
+            hijos.add(hijo);
+            return hijo;
+        }
+
+        int contar() {
+            int total = 1;
+            for (Nodo h : hijos) total += h.contar();
+            return total;
+        }
+
+        int altura() {
+            int max = 0;
+            for (Nodo h : hijos) max = Math.max(max, h.altura());
+            return max + 1;
+        }
+
+        void imprimir() {
+            System.out.println(valor);
+            for (int i = 0; i < hijos.size(); i++)
+                hijos.get(i).imprimir("", i == hijos.size() - 1);
+        }
+
+        private void imprimir(String prefijo, boolean ultimo) {
+            System.out.println(prefijo + (ultimo ? "└── " : "├── ") + valor);
+            for (int i = 0; i < hijos.size(); i++)
+                hijos.get(i).imprimir(prefijo + (ultimo ? "    " : "│   "), i == hijos.size() - 1);
+        }
+    }
+
+    static Nodo crear() {
+        Nodo gerente = new Nodo("Gerente General");
+        Nodo ti = gerente.agregar("Director de TI");
+        ti.agregar("Jefe de Desarrollo");
+        ti.agregar("Jefe de Soporte");
+        Nodo fin = gerente.agregar("Director Financiero");
+        fin.agregar("Contador");
+        fin.agregar("Tesorero");
+        gerente.agregar("Director de RR.HH.").agregar("Selección de Personal");
+        return gerente;
+    }
+
+    public static void main(String[] args) {
+        Nodo raiz = crear();
+        raiz.imprimir();
+        System.out.println("Nodos: " + raiz.contar() + " | Altura: " + raiz.altura());
+    }
+}
