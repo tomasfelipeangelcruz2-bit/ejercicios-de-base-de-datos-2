@@ -1,58 +1,123 @@
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-/** Árbol genealógico modelado como árbol general. */
-public class ArbolGenealogico {
+class ArbolGenealogico {
 
-    static class Nodo {
-        String valor;
-        List<Nodo> hijos = new ArrayList<>();
+    static class Persona {
+        String nombre;
+        Persona padre; // puede ser null
+        Persona madre; // puede ser null
+        List<Persona> hijos = new ArrayList<>();
 
-        Nodo(String valor) { this.valor = valor; }
-
-        Nodo agregar(String valorHijo) {
-            Nodo hijo = new Nodo(valorHijo);
-            hijos.add(hijo);
-            return hijo;
+        Persona(String nombre, Persona padre, Persona madre) {
+            this.nombre = nombre;
+            this.padre = padre;
+            this.madre = madre;
+            if (padre != null)
+                padre.hijos.add(this);
+            if (madre != null)
+                madre.hijos.add(this);
         }
 
-        int contar() {
-            int total = 1;
-            for (Nodo h : hijos) total += h.contar();
-            return total;
+        List<Persona> abuelos() {
+            List<Persona> res = new ArrayList<>();
+            if (padre != null) {
+                if (padre.padre != null)
+                    res.add(padre.padre);
+                if (padre.madre != null)
+                    res.add(padre.madre);
+            }
+            if (madre != null) {
+                if (madre.padre != null)
+                    res.add(madre.padre);
+                if (madre.madre != null)
+                    res.add(madre.madre);
+            }
+            return res;
         }
 
-        int altura() {
-            int max = 0;
-            for (Nodo h : hijos) max = Math.max(max, h.altura());
-            return max + 1;
+        // Hermanos = otros hijos de mi padre o de mi madre
+        Set<Persona> hermanos() {
+            Set<Persona> res = new LinkedHashSet<>();
+            if (padre != null)
+                res.addAll(padre.hijos);
+            if (madre != null)
+                res.addAll(madre.hijos);
+            res.remove(this);
+            return res;
         }
 
-        void imprimir() {
-            System.out.println(valor);
-            for (int i = 0; i < hijos.size(); i++)
-                hijos.get(i).imprimir("", i == hijos.size() - 1);
+        // Completo: mismo padre y misma madre. Medio: solo comparten uno.
+        String tipoHermano(Persona otro) {
+            boolean mismoPadre = padre != null && padre == otro.padre;
+            boolean mismaMadre = madre != null && madre == otro.madre;
+            if (mismoPadre && mismaMadre)
+                return "hermano completo";
+            if (mismoPadre)
+                return "medio hermano (solo por parte de padre)";
+            if (mismaMadre)
+                return "medio hermano (solo por parte de madre)";
+            return "no es hermano";
         }
 
-        private void imprimir(String prefijo, boolean ultimo) {
-            System.out.println(prefijo + (ultimo ? "└── " : "├── ") + valor);
-            for (int i = 0; i < hijos.size(); i++)
-                hijos.get(i).imprimir(prefijo + (ultimo ? "    " : "│   "), i == hijos.size() - 1);
+        // Imprime los ancestros hacia arriba con sangría
+        void imprimirAncestros(String prefijo) {
+            System.out.println(prefijo + nombre);
+            if (padre != null)
+                padre.imprimirAncestros(prefijo + "    (padre) ");
+            if (madre != null)
+                madre.imprimirAncestros(prefijo + "    (madre) ");
+        }
+
+        // Imprime los descendientes hacia abajo con sangría
+        void imprimirDescendientes(String prefijo) {
+            System.out.println(prefijo + nombre);
+            for (Persona h : hijos)
+                h.imprimirDescendientes(prefijo + "    ");
         }
     }
 
-    static Nodo crear() {
-        Nodo abuelo = new Nodo("Abuelo Carlos");
-        Nodo padre = abuelo.agregar("Padre Luis");
-        padre.agregar("Hijo Tomas");
-        padre.agregar("Hija Sofía");
-        abuelo.agregar("Tía Marta").agregar("Primo Andrés");
-        return abuelo;
+    static String nombres(Iterable<Persona> personas) {
+        List<String> res = new ArrayList<>();
+        for (Persona p : personas)
+            res.add(p.nombre);
+        return res.toString();
     }
 
     public static void main(String[] args) {
-        Nodo raiz = crear();
-        raiz.imprimir();
-        System.out.println("Nodos: " + raiz.contar() + " | Altura: " + raiz.altura());
+        // 4 abuelos (sin padres registrados)
+        Persona abueloPaterno = new Persona("Abuelo Paterno", null, null);
+        Persona abuelaPaterna = new Persona("Abuela Paterna", null, null);
+        Persona abueloMaterno = new Persona("Abuelo Materno", null, null);
+        Persona abuelaMaterna = new Persona("Abuela Materna", null, null);
+
+        // 2 padres
+        Persona padre = new Persona("Padre", abueloPaterno, abuelaPaterna);
+        Persona madre = new Persona("Madre", abueloMaterno, abuelaMaterna);
+
+        // 1 hijo (de padre y madre)
+        Persona hijo = new Persona("Hijo", padre, madre);
+
+        // Otra hija: solo hija del padre (su madre es otra persona, no está en el
+        // árbol)
+        Persona hija = new Persona("Hija", padre, null);
+
+        System.out.println("=== ANCESTROS DEL HIJO ===");
+        hijo.imprimirAncestros("");
+
+        System.out.println("\n=== DESCENDIENTES DE LOS ABUELOS PATERNOS ===");
+        abueloPaterno.imprimirDescendientes("");
+
+        System.out.println("\n=== RELACIONES ===");
+        System.out.println("Padres del Hijo: " + nombres(List.of(hijo.padre, hijo.madre)));
+        System.out.println("Abuelos del Hijo: " + nombres(hijo.abuelos()));
+        System.out.println("Hijos del Padre: " + nombres(padre.hijos));
+        System.out.println("Hijos de la Madre: " + nombres(madre.hijos));
+        System.out.println("Hija -> padre: " + hija.padre.nombre
+                + ", madre: " + (hija.madre == null ? "no pertenece a este árbol" : hija.madre.nombre));
+        System.out.println("Hermanos del Hijo: " + nombres(hijo.hermanos()));
+        System.out.println("Hija es " + hija.tipoHermano(hijo) + " del Hijo");
     }
 }
