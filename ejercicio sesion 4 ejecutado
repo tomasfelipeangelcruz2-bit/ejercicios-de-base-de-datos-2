@@ -1,0 +1,50 @@
+====================================================
+       ESTRUCTURA DE UNA EMPRESA TECNOLOGICA
+====================================================
+Total de cargos y areas: 12
+Cargo principal: Director general
+Mayor cantidad de subordinados directos: 3
+Niveles de la organizacion: 3
+
+ORGANIGRAMA DE LA EMPRESA
+Director general
+|-- Area de tecnologia
+|   |-- Desarrollo de software
+|   |   |-- Programador junior
+|   |   `-- Analista de pruebas
+|   `-- Soporte tecnico
+|       `-- Mesa de ayuda
+|-- Area comercial
+|   |-- Ventas
+|   `-- Mercadeo
+`-- Area administrativa
+    `-- Contabilidad
+
+DETALLE DE CADA PUESTO
+Cargo o area              Depende de                Equipo   Nivel        Categoria 
+--------------------------------------------------------------------------------
+Director general          Ninguno                   3        0            Direccion 
+Area de tecnologia        Director general          2        1            Coordinacion
+Desarrollo de software    Area de tecnologia        2        2            Coordinacion
+Programador junior        Desarrollo de software    0        3            Operativo 
+Analista de pruebas       Desarrollo de software    0        3            Operativo 
+Soporte tecnico           Area de tecnologia        1        2            Coordinacion
+Mesa de ayuda             Soporte tecnico           0        3            Operativo 
+Area comercial            Director general          2        1            Coordinacion
+Ventas                    Area comercial            0        2            Operativo 
+Mercadeo                  Area comercial            0        2            Operativo 
+Area administrativa       Director general          1        1            Coordinacion
+Contabilidad              Area administrativa       0        2            Operativo 
+
+PUESTOS SIN PERSONAL A CARGO
+- Programador junior (nivel 3)
+- Analista de pruebas (nivel 3)
+- Mesa de ayuda (nivel 3)
+- Ventas (nivel 2)
+- Mercadeo (nivel 2)
+- Contabilidad (nivel 2)
+
+EJEMPLO DE CRECIMIENTO
+Se agrego el puesto: Practicante de desarrollo
+Nuevos cargos y areas: 13
+Nueva altura organizacional: 4
