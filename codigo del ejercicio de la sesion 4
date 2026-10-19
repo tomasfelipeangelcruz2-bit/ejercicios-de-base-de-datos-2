@@ -1,0 +1,121 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        NodoGeneral<String> director = new NodoGeneral<>("Director general");
+        NodoGeneral<String> tecnologia = new NodoGeneral<>("Area de tecnologia");
+        NodoGeneral<String> comercial = new NodoGeneral<>("Area comercial");
+        NodoGeneral<String> administrativa = new NodoGeneral<>("Area administrativa");
+        NodoGeneral<String> desarrollo = new NodoGeneral<>("Desarrollo de software");
+        NodoGeneral<String> soporte = new NodoGeneral<>("Soporte tecnico");
+        NodoGeneral<String> ventas = new NodoGeneral<>("Ventas");
+        NodoGeneral<String> mercadeo = new NodoGeneral<>("Mercadeo");
+        NodoGeneral<String> contabilidad = new NodoGeneral<>("Contabilidad");
+        NodoGeneral<String> programador = new NodoGeneral<>("Programador junior");
+        NodoGeneral<String> analista = new NodoGeneral<>("Analista de pruebas");
+        NodoGeneral<String> mesaAyuda = new NodoGeneral<>("Mesa de ayuda");
+
+        director.agregarHijo(tecnologia);
+        director.agregarHijo(comercial);
+        director.agregarHijo(administrativa);
+        tecnologia.agregarHijo(desarrollo);
+        tecnologia.agregarHijo(soporte);
+        comercial.agregarHijo(ventas);
+        comercial.agregarHijo(mercadeo);
+        administrativa.agregarHijo(contabilidad);
+        desarrollo.agregarHijo(programador);
+        desarrollo.agregarHijo(analista);
+        soporte.agregarHijo(mesaAyuda);
+
+        System.out.println("====================================================");
+        System.out.println("       ESTRUCTURA DE UNA EMPRESA TECNOLOGICA");
+        System.out.println("====================================================");
+        System.out.println("Total de cargos y areas: " + contarNodos(director));
+        System.out.println("Cargo principal: " + director.getDato());
+        System.out.println("Mayor cantidad de subordinados directos: " + gradoArbol(director));
+        System.out.println("Niveles de la organizacion: " + altura(director));
+
+        System.out.println("\nORGANIGRAMA DE LA EMPRESA");
+        imprimirArbol(director, "", true, true);
+
+        System.out.println("\nDETALLE DE CADA PUESTO");
+        System.out.printf("%-25s %-25s %-8s %-12s %-10s%n", "Cargo o area", "Depende de", "Equipo", "Nivel", "Categoria");
+        System.out.println("--------------------------------------------------------------------------------");
+        imprimirDetalles(director, "Ninguno", 0);
+
+        System.out.println("\nPUESTOS SIN PERSONAL A CARGO");
+        imprimirHojas(director, 0);
+
+        System.out.println("\nEJEMPLO DE CRECIMIENTO");
+        NodoGeneral<String> practicante = new NodoGeneral<>("Practicante de desarrollo");
+        programador.agregarHijo(practicante);
+        System.out.println("Se agrego el puesto: " + practicante.getDato());
+        System.out.println("Nuevos cargos y areas: " + contarNodos(director));
+        System.out.println("Nueva altura organizacional: " + altura(director));
+    }
+
+    static int contarNodos(NodoGeneral<?> nodo) {
+        int total = 1;
+        for (NodoGeneral<?> hijo : nodo.getHijos()) total += contarNodos(hijo);
+        return total;
+    }
+
+    static int altura(NodoGeneral<?> nodo) {
+        if (nodo.getHijos().isEmpty()) return 0;
+        int mayor = 0;
+        for (NodoGeneral<?> hijo : nodo.getHijos()) mayor = Math.max(mayor, altura(hijo));
+        return mayor + 1;
+    }
+
+    static int gradoArbol(NodoGeneral<?> nodo) {
+        int mayor = nodo.getHijos().size();
+        for (NodoGeneral<?> hijo : nodo.getHijos()) mayor = Math.max(mayor, gradoArbol(hijo));
+        return mayor;
+    }
+
+    static void imprimirArbol(NodoGeneral<?> nodo, String prefijo, boolean ultimo, boolean raiz) {
+        if (raiz) {
+            System.out.println(nodo.getDato());
+        } else {
+            System.out.println(prefijo + (ultimo ? "`-- " : "|-- ") + nodo.getDato());
+        }
+        List<? extends NodoGeneral<?>> hijos = nodo.getHijos();
+        for (int i = 0; i < hijos.size(); i++) {
+            boolean esUltimo = i == hijos.size() - 1;
+            String nuevoPrefijo = raiz ? "" : prefijo + (ultimo ? "    " : "|   ");
+            imprimirArbol(hijos.get(i), nuevoPrefijo, esUltimo, false);
+        }
+    }
+
+    static void imprimirDetalles(NodoGeneral<?> nodo, String padre, int nivel) {
+        String categoria = padre.equals("Ninguno") ? "Direccion" : (nodo.getHijos().isEmpty() ? "Operativo" : "Coordinacion");
+        System.out.printf("%-25s %-25s %-8d %-12d %-10s%n",
+                nodo.getDato(), padre, nodo.getHijos().size(), nivel, categoria);
+        for (NodoGeneral<?> hijo : nodo.getHijos()) {
+            imprimirDetalles(hijo, String.valueOf(nodo.getDato()), nivel + 1);
+        }
+    }
+
+    static void imprimirHojas(NodoGeneral<?> nodo, int nivel) {
+        if (nodo.getHijos().isEmpty()) {
+            System.out.println("- " + nodo.getDato() + " (nivel " + nivel + ")");
+            return;
+        }
+        for (NodoGeneral<?> hijo : nodo.getHijos()) imprimirHojas(hijo, nivel + 1);
+    }
+}
+
+class NodoGeneral<T> {
+    private final T dato;
+    private final List<NodoGeneral<T>> hijos;
+
+    public NodoGeneral(T dato) {
+        this.dato = dato;
+        this.hijos = new ArrayList<>();
+    }
+
+    public T getDato() { return dato; }
+    public List<NodoGeneral<T>> getHijos() { return hijos; }
+    public void agregarHijo(NodoGeneral<T> hijo) { hijos.add(hijo); }
+}
