@@ -1,0 +1,414 @@
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.Scanner;
+
+class Nodo {
+    int codigo;
+    Nodo izquierdo;
+    Nodo derecho;
+
+    public Nodo(int codigo) {
+        this.codigo = codigo;
+        izquierdo = null;
+        derecho = null;
+    }
+}
+
+class ArbolBST {
+    private Nodo raiz;
+
+    // Insertar un codigo de forma recursiva
+    public void insertar(int codigo) {
+        raiz = insertarRecursivo(raiz, codigo);
+    }
+
+    private Nodo insertarRecursivo(Nodo actual, int codigo) {
+        if (actual == null) {
+            return new Nodo(codigo);
+        }
+
+        if (codigo < actual.codigo) {
+            actual.izquierdo =
+                insertarRecursivo(actual.izquierdo, codigo);
+        } else if (codigo > actual.codigo) {
+            actual.derecho =
+                insertarRecursivo(actual.derecho, codigo);
+        }
+
+        return actual;
+    }
+
+    // Buscar un codigo recursivamente
+    public boolean buscar(int codigo) {
+        return buscarRecursivo(raiz, codigo);
+    }
+
+    private boolean buscarRecursivo(Nodo actual, int codigo) {
+        if (actual == null) {
+            return false;
+        }
+
+        if (actual.codigo == codigo) {
+            return true;
+        }
+
+        if (codigo < actual.codigo) {
+            return buscarRecursivo(actual.izquierdo, codigo);
+        }
+
+        return buscarRecursivo(actual.derecho, codigo);
+    }
+
+    // Recorrido inorden: de menor a mayor
+    public void inorden() {
+        inordenRecursivo(raiz);
+        System.out.println();
+    }
+
+    private void inordenRecursivo(Nodo actual) {
+        if (actual != null) {
+            inordenRecursivo(actual.izquierdo);
+            System.out.print(actual.codigo + " ");
+            inordenRecursivo(actual.derecho);
+        }
+    }
+
+    // Calcular altura en niveles
+    public int altura() {
+        return alturaRecursiva(raiz);
+    }
+
+    private int alturaRecursiva(Nodo actual) {
+        if (actual == null) {
+            return 0;
+        }
+
+        int izquierda = alturaRecursiva(actual.izquierdo);
+        int derecha = alturaRecursiva(actual.derecho);
+
+        return 1 + Math.max(izquierda, derecha);
+    }
+
+    // Contar nodos
+    public int contarNodos() {
+        return contarNodosRecursivo(raiz);
+    }
+
+    private int contarNodosRecursivo(Nodo actual) {
+        if (actual == null) {
+            return 0;
+        }
+
+        return 1 + contarNodosRecursivo(actual.izquierdo)
+                 + contarNodosRecursivo(actual.derecho);
+    }
+
+    // Mostrar el arbol de forma visual en consola
+    public void mostrarArbol() {
+        if (raiz == null) {
+            System.out.println("(Arbol vacio)");
+            return;
+        }
+
+        mostrarArbolRecursivo(raiz, "", false);
+    }
+
+    private void mostrarArbolRecursivo(
+            Nodo actual, String espacio, boolean esIzquierdo) {
+
+        if (actual == null) {
+            return;
+        }
+
+        mostrarArbolRecursivo(
+            actual.derecho,
+            espacio + (esIzquierdo ? "|   " : "    "),
+            false
+        );
+
+        System.out.println(
+            espacio
+            + (esIzquierdo ? "\\-- " : "/-- ")
+            + actual.codigo
+        );
+
+        mostrarArbolRecursivo(
+            actual.izquierdo,
+            espacio + (esIzquierdo ? "    " : "|   "),
+            true
+        );
+    }
+
+    // Eliminar un codigo
+    public void eliminar(int codigo) {
+        raiz = eliminarRecursivo(raiz, codigo);
+    }
+
+    private Nodo eliminarRecursivo(Nodo actual, int codigo) {
+        if (actual == null) {
+            return null;
+        }
+
+        if (codigo < actual.codigo) {
+            actual.izquierdo =
+                eliminarRecursivo(actual.izquierdo, codigo);
+
+        } else if (codigo > actual.codigo) {
+            actual.derecho =
+                eliminarRecursivo(actual.derecho, codigo);
+
+        } else {
+            // Caso 1: nodo hoja
+            if (actual.izquierdo == null
+                    && actual.derecho == null) {
+                return null;
+            }
+
+            // Caso 2: nodo con un solo hijo
+            if (actual.izquierdo == null) {
+                return actual.derecho;
+            }
+
+            if (actual.derecho == null) {
+                return actual.izquierdo;
+            }
+
+            // Caso 3: nodo con dos hijos
+            // Buscar el menor del subarbol derecho
+            Nodo sucesor = minimo(actual.derecho);
+            actual.codigo = sucesor.codigo;
+
+            actual.derecho =
+                eliminarRecursivo(actual.derecho, sucesor.codigo);
+        }
+
+        return actual;
+    }
+
+    private Nodo minimo(Nodo actual) {
+        while (actual.izquierdo != null) {
+            actual = actual.izquierdo;
+        }
+
+        return actual;
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner entrada = new Scanner(System.in);
+        ArbolBST arbol = new ArbolBST();
+        int opcion;
+
+        do {
+            System.out.println("\n================================");
+            System.out.println("     CATALOGO INTELIGENTE");
+            System.out.println("       ARBOL BST - JAVA");
+            System.out.println("================================");
+            System.out.println("1. Insertar codigos");
+            System.out.println("2. Buscar un codigo");
+            System.out.println("3. Mostrar arbol y recorrido");
+            System.out.println("4. Comparar datos ordenados y aleatorios");
+            System.out.println("5. Eliminar nodo hoja");
+            System.out.println("6. Eliminar nodo con un hijo");
+            System.out.println("7. Eliminar nodo con dos hijos");
+            System.out.println("8. Mostrar altura y cantidad de nodos");
+            System.out.println("0. Salir");
+            System.out.print("Seleccione una opcion: ");
+
+            opcion = leerEntero(entrada);
+
+            switch (opcion) {
+                case 1:
+                    System.out.print("Codigo del producto: ");
+                    int codigo = leerEntero(entrada);
+                    arbol.insertar(codigo);
+                    System.out.println("Codigo procesado.");
+                    break;
+
+                case 2:
+                    System.out.print("Codigo que desea buscar: ");
+                    codigo = leerEntero(entrada);
+
+                    if (arbol.buscar(codigo)) {
+                        System.out.println("Codigo encontrado.");
+                    } else {
+                        System.out.println("Codigo no encontrado.");
+                    }
+                    break;
+
+                case 3:
+                    System.out.println("\nArbol actual:");
+                    arbol.mostrarArbol();
+
+                    System.out.print("Recorrido inorden: ");
+                    arbol.inorden();
+                    break;
+
+                case 4:
+                    compararArboles();
+                    break;
+
+                case 5:
+                    probarEliminacion(1);
+                    break;
+
+                case 6:
+                    probarEliminacion(2);
+                    break;
+
+                case 7:
+                    probarEliminacion(3);
+                    break;
+
+                case 8:
+                    System.out.println("Cantidad de nodos: "
+                        + arbol.contarNodos());
+                    System.out.println("Altura en niveles: "
+                        + arbol.altura());
+                    break;
+
+                case 0:
+                    System.out.println("Programa finalizado.");
+                    break;
+
+                default:
+                    System.out.println("Opcion no valida.");
+            }
+
+        } while (opcion != 0);
+
+        entrada.close();
+    }
+
+    // Leer enteros evitando errores de entrada
+    public static int leerEntero(Scanner entrada) {
+        while (!entrada.hasNextInt()) {
+            System.out.print("Ingrese un numero entero: ");
+            entrada.next();
+        }
+
+        return entrada.nextInt();
+    }
+
+    // Comparar altura con datos ordenados y aleatorios
+    public static void compararArboles() {
+        int cantidad = 10;
+        ArbolBST ordenado = new ArbolBST();
+        ArbolBST aleatorio = new ArbolBST();
+
+        for (int i = 1; i <= cantidad; i++) {
+            ordenado.insertar(i);
+        }
+
+        int[] codigos = new int[cantidad];
+
+        for (int i = 0; i < cantidad; i++) {
+            codigos[i] = i + 1;
+        }
+
+        Random random = new Random(42);
+
+        for (int i = cantidad - 1; i > 0; i--) {
+            int j = random.nextInt(i + 1);
+            int temporal = codigos[i];
+            codigos[i] = codigos[j];
+            codigos[j] = temporal;
+        }
+
+        for (int codigo : codigos) {
+            aleatorio.insertar(codigo);
+        }
+
+        System.out.println("\n--- DATOS ORDENADOS ---");
+        System.out.println("Codigos: "
+            + Arrays.toString(
+                crearSecuencia(cantidad)));
+        ordenado.mostrarArbol();
+        System.out.println("Altura: " + ordenado.altura());
+
+        System.out.println("\n--- DATOS ALEATORIOS ---");
+        System.out.println("Codigos: "
+            + Arrays.toString(codigos));
+        aleatorio.mostrarArbol();
+        System.out.println("Altura: " + aleatorio.altura());
+
+        System.out.println("\n--- COMPARACION ---");
+        System.out.println("Nodos en cada arbol: " + cantidad);
+        System.out.println("Altura ordenado: " + ordenado.altura());
+        System.out.println("Altura aleatorio: " + aleatorio.altura());
+        System.out.println(
+            "El arbol con menor altura suele requerir "
+            + "menos comparaciones."
+        );
+    }
+
+    public static int[] crearSecuencia(int cantidad) {
+        int[] datos = new int[cantidad];
+
+        for (int i = 0; i < cantidad; i++) {
+            datos[i] = i + 1;
+        }
+
+        return datos;
+    }
+
+    // Pruebas independientes de los tres casos de eliminacion
+    public static void probarEliminacion(int caso) {
+        ArbolBST prueba = new ArbolBST();
+
+        if (caso == 1) {
+            int[] datos = {50, 30, 70, 20, 40, 60, 80};
+
+            for (int dato : datos) {
+                prueba.insertar(dato);
+            }
+
+            System.out.println("\nELIMINAR NODO HOJA: 20");
+            System.out.println("ANTES:");
+            prueba.mostrarArbol();
+
+            prueba.eliminar(20);
+
+            System.out.println("DESPUES:");
+            prueba.mostrarArbol();
+
+        } else if (caso == 2) {
+            int[] datos = {50, 30, 70, 60};
+
+            for (int dato : datos) {
+                prueba.insertar(dato);
+            }
+
+            System.out.println("\nELIMINAR NODO CON UN HIJO: 70");
+            System.out.println("ANTES:");
+            prueba.mostrarArbol();
+
+            prueba.eliminar(70);
+
+            System.out.println("DESPUES:");
+            prueba.mostrarArbol();
+
+        } else if (caso == 3) {
+            int[] datos = {50, 30, 70, 20, 40, 60, 80};
+
+            for (int dato : datos) {
+                prueba.insertar(dato);
+            }
+
+            System.out.println("\nELIMINAR NODO CON DOS HIJOS: 50");
+            System.out.println("ANTES:");
+            prueba.mostrarArbol();
+
+            prueba.eliminar(50);
+
+            System.out.println("DESPUES:");
+            prueba.mostrarArbol();
+        }
+
+        System.out.println("Recorrido final:");
+        prueba.inorden();
+    }
+}
